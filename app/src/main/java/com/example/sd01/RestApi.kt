@@ -2,7 +2,9 @@ package com.example.sd01
 
 
 import com.google.gson.annotations.SerializedName
+import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -10,6 +12,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import java.util.concurrent.TimeUnit
 
 interface RestApi {
     @Headers(
@@ -80,15 +83,17 @@ data class OptionResponse(
 data class UserInfo(
     @SerializedName("prompt") val prompt:String?,
     @SerializedName("steps") val steps:Int?,
+    @SerializedName("override_settings") val option:OptionData?,
 )
-data class UserResponse(
-    @SerializedName("images") val prompt:String?,
+data class OptionData(
+    @SerializedName("sd_model_checkpoint") val model:String?,
 )
 
 object ServiceBuilder{
     private val txt2imgUrl = "192.168.4.4/sdapi/v1/txt2img"
     private val postApi = "sdapi/v1/txt2img"
-    private val client = OkHttpClient.Builder().build()
+    private val client = OkHttpClient.Builder()
+        .build()
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("http://192.168.4.4:7860")

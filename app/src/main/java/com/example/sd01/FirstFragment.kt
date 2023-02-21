@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.sd01.databinding.FragmentFirstBinding
 
@@ -35,12 +34,13 @@ class FirstFragment : Fragment() {
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
 
         binding.button.setOnClickListener { view ->
-            testAddPost()
+
+            submitTxt2Img()
         }
 
         _spinner = binding.modelSpinner
         binding.mentionLabel.text = modelLoad
-        
+
         Init()
         return binding.root
 
@@ -79,7 +79,7 @@ class FirstFragment : Fragment() {
 
         var index = modelsList!!.indexOfFirst { it == options?.model }
         modelIndex = index
-        SetModels(index)
+        setModelsSpinner(index)
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -91,7 +91,7 @@ class FirstFragment : Fragment() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                SetModels(modelIndex)
+                setModelsSpinner(modelIndex)
             }
 
         }
@@ -100,16 +100,18 @@ class FirstFragment : Fragment() {
     }
 
     private fun changeModels(index:Int){
-        val modelName = modelsList?.get(index)
+        val modelName = modelsList!![index]
         if (modelName == options?.model) return
 
-        val apiService = RestApiService()
-        var op:OptionResponse = OptionResponse(
-            model = modelName!!
-        )
-        changeModeling = true
-        binding.mentionLabel.text = modelLoading
-        apiService.setOptions(op, ::SetOptionResponse)
+        options?.model = modelName
+        //现在不需要完全修改服务器的model， 单次请求单次单独的model
+//        val apiService = RestApiService()
+//        var op:OptionResponse = OptionResponse(
+//            model = modelName!!
+//        )
+//        changeModeling = true
+//        binding.mentionLabel.text = modelLoading
+//        apiService.setOptions(op, ::SetOptionResponse)
     }
 
     fun SetOptionResponse(res: Any?) {
@@ -124,22 +126,26 @@ class FirstFragment : Fragment() {
         apiService.getModels(::modelsInit)
     }
 
-    private fun SetModels(index: Int){
+    private fun setModelsSpinner(index: Int){
         spinner.setSelection(index)
     }
 
 
-    private fun testAddPost(){
+    private fun submitTxt2Img(){
         if (isSubmitting || isInit || changeModeling) return
         isSubmitting = true
         _binding?.button?.text = "Wait..."
 //        val apiService = RestApiService()
         val prompt = _binding?.promptsText?.text.toString()
         val steps = _binding?.StepsText?.text.toString().toIntOrNull() ?: 0
+        val option = OptionData(
+            model = options?.model
+        )
 
         val userInfo = UserInfo(
             prompt = prompt,
-            steps = steps
+            steps = steps,
+            option = option
         )
         val apiService = RestApiService()
         apiService.postTxt2Img(userInfo, ::showImage)
