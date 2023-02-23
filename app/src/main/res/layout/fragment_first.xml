@@ -20,13 +20,12 @@
     <Button
         android:id="@+id/button"
         android:layout_width="95dp"
-        android:layout_height="51dp"
-        android:layout_marginStart="158dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="161dp"
         android:layout_marginTop="520dp"
         android:layout_marginEnd="159dp"
         android:text="Submit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -46,56 +45,56 @@
         android:id="@+id/promptsText"
         android:layout_width="214dp"
         android:layout_height="44dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="392dp"
-        android:layout_marginEnd="96dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Girl"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/promptLabel"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/StepsText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="1dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="452dp"
-        android:layout_marginEnd="101dp"
         android:ems="10"
         android:inputType="number"
         android:text="50"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/StepLabel"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/StepLabel"
-        android:layout_width="65dp"
-        android:layout_height="21dp"
-        android:layout_marginStart="28dp"
+        android:layout_width="52dp"
+        android:layout_height="28dp"
         android:layout_marginTop="460dp"
+        android:layout_marginEnd="250dp"
         android:text="Step"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/promptLabel"
-        android:layout_width="65dp"
-        android:layout_height="21dp"
-        android:layout_marginStart="28dp"
+        android:layout_width="54dp"
+        android:layout_height="33dp"
         android:layout_marginTop="404dp"
+        android:layout_marginEnd="250dp"
         android:text="Prompt"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/modelsLabel"
-        android:layout_width="65dp"
-        android:layout_height="21dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="300dp"
+        android:layout_width="48dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="296dp"
+        android:layout_marginEnd="250dp"
         android:text="Model"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -103,9 +102,9 @@
         android:id="@+id/modelSpinner"
         android:layout_width="211dp"
         android:layout_height="27dp"
-        android:layout_marginStart="100dp"
+        android:layout_marginStart="7dp"
         android:layout_marginTop="292dp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/modelsLabel"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView

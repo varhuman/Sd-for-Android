@@ -1,9 +1,11 @@
 package com.example.sd01
 
 
+import com.google.gson.JsonArray
 import com.google.gson.annotations.SerializedName
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
+import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -84,15 +86,34 @@ data class UserInfo(
     @SerializedName("prompt") val prompt:String?,
     @SerializedName("steps") val steps:Int?,
     @SerializedName("override_settings") val option:OptionData?,
+    @SerializedName("script_args") val args:JsonArray,
 )
 data class OptionData(
     @SerializedName("sd_model_checkpoint") val model:String?,
+)
+
+data class ArgsData(
+    @SerializedName("AddNet Enabled") val addNetEnabled:Boolean?,
+    @SerializedName("AddNet Separate Weights") val addNetSeparateWeights:Boolean?,
+    @SerializedName("AddNet Module 1") val addNetModule1:String?,
+    @SerializedName("AddNet Model 1") val addNetModel1:String?,
+    @SerializedName("AddNet Weight A 1") val addNetWeightA1:Int?,
+    @SerializedName("AddNet Weight B 1") val addNetWeightB1:Int?,
+    @SerializedName("AddNet Module 2") val addNetModule2:String?,
+    @SerializedName("AddNet Model 2") val addNetModel2:String?,
+    @SerializedName("AddNet Weight A 2") val addNetWeightA2:Int?,
+    @SerializedName("AddNet Weight B 2") val addNetWeightB2:Int?,
 )
 
 object ServiceBuilder{
     private val txt2imgUrl = "192.168.4.4/sdapi/v1/txt2img"
     private val postApi = "sdapi/v1/txt2img"
     private val client = OkHttpClient.Builder()
+        .connectTimeout(100, TimeUnit.SECONDS)
+        .callTimeout(100, TimeUnit.SECONDS)
+        .readTimeout(100, TimeUnit.SECONDS)
+        .writeTimeout(100, TimeUnit.SECONDS)
+        .connectionPool(ConnectionPool(10, 100, TimeUnit.SECONDS))
         .build()
 
     private val retrofit = Retrofit.Builder()

@@ -132,7 +132,7 @@ class FirstFragment : Fragment() {
 
 
     private fun submitTxt2Img(){
-        if (isSubmitting || isInit || changeModeling) return
+        if (isInit || changeModeling) return
         isSubmitting = true
         _binding?.button?.text = "Wait..."
 //        val apiService = RestApiService()
@@ -142,19 +142,24 @@ class FirstFragment : Fragment() {
             model = options?.model
         )
 
+        val arg = ConnectUtil.getArgs2(true, null,null,null,null)
+
         val userInfo = UserInfo(
             prompt = prompt,
             steps = steps,
-            option = option
+            option = option,
+            args = arg
         )
         val apiService = RestApiService()
         apiService.postTxt2Img(userInfo, ::showImage)
     }
 
     private fun showImage(res : Txt2ImgResponse?){
-        val base64String = res?.images?.get(0)
         _binding?.button?.text = "SUBMIT"
         isSubmitting = false
+
+        if (res == null) return
+        val base64String = res?.images?.get(0)
         val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
         val decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
         _binding?.imageView?.setImageBitmap(decodedImage)
