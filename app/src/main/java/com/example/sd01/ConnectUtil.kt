@@ -21,7 +21,7 @@ object ConnectUtil {
         return args
     }
 
-    public fun getArgs2(open: Boolean, m1Model: String?, m1Weight: Int?, m2Model: String?, m2Weight: Int?): JsonArray {
+    public fun getArgs2(open: Boolean, loraInfo:JsonArray): JsonArray {
         var test = "lora-hanfugirl-v1-5(c97665df9b71)"
         var test2 = "dingzhenlora_v1(fa7c1732cc95)"
 
@@ -29,10 +29,7 @@ object ConnectUtil {
         res.add(0)
         res.add(true)
         res.add(true)
-        res.add("LoRA")
-        res.add(test2)
-        res.add(1)
-        res.add(1)
+        res.add(loraInfo)
         return res
     }
 

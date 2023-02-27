@@ -53,6 +53,22 @@ class RestApiService {
         )
     }
 
+    fun getLoras(onResult: (LoraModelResponse?) -> Unit){
+        val retrofit = ServiceBuilder.buildServices(RestApi::class.java)
+        retrofit.getLoras().enqueue(
+            object : Callback<LoraModelResponse> {
+                override fun onResponse(call: Call<LoraModelResponse>, response: Response<LoraModelResponse>) {
+                    val w = response.body()
+                    onResult(w)
+                }
+
+                override fun onFailure(call: Call<LoraModelResponse>, t: Throwable) {
+                    onResult(null)
+                }
+            }
+        )
+    }
+
     fun setOptions(option: OptionResponse, onResult: (Any?) -> Unit){
         val retrofit = ServiceBuilder.buildServices(RestApi::class.java)
         retrofit.setOptions(option).enqueue(

@@ -8,9 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.SeekBar
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.sd01.databinding.FragmentFirstBinding
+import com.google.gson.JsonArray
 
 
 /**
@@ -24,7 +27,7 @@ class FirstFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private var _spinner: Spinner? = null
-    private val spinner get() = _spinner!!
+    private val modelSpinner get() = _spinner!!
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +52,7 @@ class FirstFragment : Fragment() {
     var isInit = false
     var changeModeling = false
     var options: OptionResponse? = null
+    var loras: ArrayList<String>? = null
     var modelsList: ArrayList<String>? = null
     var modelIndex = 0
 
@@ -59,11 +63,23 @@ class FirstFragment : Fragment() {
         isInit = true
 
         getOptions()
+
+        getLora()
+    }
+
+    private fun getLora() {
+        val apiService = RestApiService()
+        apiService.getLoras(::lorasInit)
     }
 
     private fun getOptions() {
         val apiService = RestApiService()
         apiService.getOptions(::optionsInit)
+    }
+
+    private fun lorasInit(res: LoraModelResponse?){
+        loras = res?.loras
+        setLoraSpinners()
     }
 
     private fun optionsInit(res: OptionResponse?){
@@ -75,12 +91,11 @@ class FirstFragment : Fragment() {
         modelsList = ArrayList(res?.map { it.title })
 // Create an ArrayAdapter using the string array and a default spinner layout
 
-        spinner.adapter = ArrayAdapter(requireContext(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, modelsList!!)
-
+        setSpinner(modelSpinner, modelsList!!)
         var index = modelsList!!.indexOfFirst { it == options?.model }
         modelIndex = index
         setModelsSpinner(index)
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(
                 parent: AdapterView<*>?,
                 view: View?,
@@ -126,8 +141,43 @@ class FirstFragment : Fragment() {
         apiService.getModels(::modelsInit)
     }
 
+    private fun setLoraSpinners(){
+        setSpinner(binding.LoraWList1, loras!!)
+        setSpinner(binding.LoraWList2, loras!!)
+        setSpinner(binding.LoraWList3, loras!!)
+//        setSpinner(binding.LoraWList4, loras!!)
+//        setSpinner(binding.LoraWList5, loras!!)
+
+
+        val setValue :(TextView, String) -> Unit = { text: TextView, value : String -> text.text = value }
+        setSeekBarValueChange(binding.LoraWeightBar1,binding.LoraWeightBar1Value , setValue)
+        setSeekBarValueChange(binding.LoraWeightBar2,binding.LoraWeightBar2Value , setValue)
+        setSeekBarValueChange(binding.LoraWeightBar3,binding.LoraWeightBar3Value , setValue)
+//        setSeekBarValueChange(binding.LoraWeightBar4,binding.LoraWeightBar4Value , setValue)
+//        setSeekBarValueChange(binding.LoraWeightBar5,binding.LoraWeightBar5Value , setValue)
+    }
+
+    private fun setSpinner(spinner: Spinner, list: ArrayList<String>){
+        spinner.adapter = ArrayAdapter(requireContext(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, list!!)
+    }
+
+    private fun setSeekBarValueChange(seekBar: SeekBar,textView: TextView,  function: (TextView,String) -> Unit){
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                function(textView, (progress / 100f).toString())
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                // you can probably leave this empty
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                // you can probably leave this empty
+            }
+        })
+    }
+
     private fun setModelsSpinner(index: Int){
-        spinner.setSelection(index)
+        modelSpinner.setSelection(index)
     }
 
 
@@ -137,21 +187,42 @@ class FirstFragment : Fragment() {
         _binding?.button?.text = "Wait..."
 //        val apiService = RestApiService()
         val prompt = _binding?.promptsText?.text.toString()
+//        val prompt = "highres,8k,masterpiece, best quality,instagram most viewed,Megapixel,illustration"
         val steps = _binding?.StepsText?.text.toString().toIntOrNull() ?: 0
         val option = OptionData(
             model = options?.model
         )
 
-        val arg = ConnectUtil.getArgs2(true, null,null,null,null)
-
+        val arg = getLoraJson()
         val userInfo = UserInfo(
             prompt = prompt,
-            steps = steps,
+//            steps = steps,
             option = option,
-            args = arg
+            args = arg,
+            seed = -1
         )
         val apiService = RestApiService()
         apiService.postTxt2Img(userInfo, ::showImage)
+    }
+
+    private fun getLoraJson() : JsonArray{
+        var res = JsonArray()
+        res.add(0)
+        res.add(true)
+        res.add(false)
+        res.add("LoRA")
+        res.add(binding.LoraWList1.selectedItem.toString())
+        res.add(binding.LoraWeightBar1.progress / 100f)
+        res.add(binding.LoraWeightBar1.progress / 100f)
+        res.add("LoRA")
+        res.add(binding.LoraWList2.selectedItem.toString())
+        res.add(binding.LoraWeightBar2.progress / 100f)
+        res.add(binding.LoraWeightBar2.progress / 100f)
+        res.add("LoRA")
+        res.add(binding.LoraWList3.selectedItem.toString())
+        res.add(binding.LoraWeightBar3.progress / 100f)
+        res.add(binding.LoraWeightBar3.progress / 100f)
+        return res
     }
 
     private fun showImage(res : Txt2ImgResponse?){

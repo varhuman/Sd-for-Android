@@ -39,6 +39,12 @@ interface RestApi {
     fun getOptions() : Call<OptionResponse>
 
     @Headers(
+        "Host: 7860",
+    )
+    @GET("/sdapi/v1/getLora")
+    fun getLoras() : Call<LoraModelResponse>
+
+    @Headers(
         "Content-Length: 1000",
         "Host: 7860",
         "Connection: keep-alive",
@@ -82,11 +88,24 @@ data class OptionResponse(
     var model: String,
 )
 
+data class LoraModelResponse(
+
+    @SerializedName("list")
+    var loras: ArrayList<String>,
+)
+
 data class UserInfo(
-    @SerializedName("prompt") val prompt:String?,
-    @SerializedName("steps") val steps:Int?,
+    @SerializedName("prompt") val prompt:String? = "highres,8k,masterpiece, best quality,instagram most viewed,Megapixel,illustration",
+    @SerializedName("negative_prompt") val negativePrompt:String? = "lowers, bad anatomy, bad hands,text, error, missing fingers,extra digit,fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark,username, blurry",
+    @SerializedName("steps") val steps:Int? = 50,
     @SerializedName("override_settings") val option:OptionData?,
     @SerializedName("script_args") val args:JsonArray,
+    @SerializedName("seed") val seed:Int = -1,
+    @SerializedName("sampler_index") val sampler:String = "Euler a",
+    @SerializedName("width") val width:Int= 512,
+    @SerializedName("height") val height:Int = 512,
+    @SerializedName("restore_faces") val restoreFace:Boolean = true,
+    @SerializedName("script_name") val script_name:String = "additional_networks",
 )
 data class OptionData(
     @SerializedName("sd_model_checkpoint") val model:String?,
