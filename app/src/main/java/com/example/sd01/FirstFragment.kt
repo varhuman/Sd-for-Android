@@ -56,7 +56,7 @@ class FirstFragment : Fragment() {
     var modelsList: ArrayList<String>? = null
     var modelIndex = 0
 
-    val modelLoad = "Model is OK!"
+    val modelLoad = "加载图片会比较慢~"
     val modelLoading = "Model is loading..."
 
     private fun Init(){
@@ -142,6 +142,8 @@ class FirstFragment : Fragment() {
     }
 
     private fun setLoraSpinners(){
+        if (loras == null)
+            return
         setSpinner(binding.LoraWList1, loras!!)
         setSpinner(binding.LoraWList2, loras!!)
         setSpinner(binding.LoraWList3, loras!!)
@@ -182,11 +184,14 @@ class FirstFragment : Fragment() {
 
 
     private fun submitTxt2Img(){
-        if (isInit || changeModeling) return
+        if (isInit || changeModeling || isSubmitting) return
         isSubmitting = true
         _binding?.button?.text = "Wait..."
 //        val apiService = RestApiService()
-        val prompt = _binding?.promptsText?.text.toString()
+        val prompt = _binding?.PromptText?.text.toString()
+        val nprompt = _binding?.npromptText?.text.toString()
+        val faceStore = _binding?.FaceRestoreCheckBox?.isChecked
+        val seed = _binding?.SeedText?.text.toString().toIntOrNull() ?:-1
 //        val prompt = "highres,8k,masterpiece, best quality,instagram most viewed,Megapixel,illustration"
         val steps = _binding?.StepsText?.text.toString().toIntOrNull() ?: 0
         val option = OptionData(
@@ -196,10 +201,12 @@ class FirstFragment : Fragment() {
         val arg = getLoraJson()
         val userInfo = UserInfo(
             prompt = prompt,
-//            steps = steps,
+            negativePrompt = nprompt,
+            steps = steps,
             option = option,
             args = arg,
-            seed = -1
+            seed = seed,
+            restoreFace = faceStore?:true
         )
         val apiService = RestApiService()
         apiService.postTxt2Img(userInfo, ::showImage)
@@ -233,7 +240,10 @@ class FirstFragment : Fragment() {
         val base64String = res?.images?.get(0)
         val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
         val decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
         _binding?.imageView?.setImageBitmap(decodedImage)
+//        Util.saveToInternalStorage(decodedImage, "test", requireContext())
+        Util.saveToGallery(decodedImage, "test", requireContext())
     }
 
 

@@ -4,9 +4,9 @@ package com.example.sd01
 import com.google.gson.JsonArray
 import com.google.gson.annotations.SerializedName
 import okhttp3.ConnectionPool
+import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
-import org.json.JSONArray
-import org.json.JSONObject
+import org.apache.http.conn.ssl.SSLSocketFactory
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -14,12 +14,24 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import java.io.FileInputStream
+import java.io.InputStream
+import java.security.SecureRandom
+import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+import kotlin.collections.ArrayList
 
+const val host = 443
 interface RestApi {
     @Headers(
         "Content-Length: 1000",
-        "Host: 7860",
+        "Host: $host",
         "Connection: keep-alive",
         "Content-Type: application/json"
     )
@@ -27,26 +39,26 @@ interface RestApi {
     fun postTxt2Img(@Body userData: UserInfo) : Call<Txt2ImgResponse>
 
     @Headers(
-        "Host: 7860",
+        "Host: $host",
     )
     @GET("/sdapi/v1/sd-models")
     fun getmodels() : Call<List<ModelsResponse>>
 
     @Headers(
-        "Host: 7860",
+        "Host: $host",
     )
     @GET("/sdapi/v1/options")
     fun getOptions() : Call<OptionResponse>
 
     @Headers(
-        "Host: 7860",
+        "Host: $host",
     )
     @GET("/sdapi/v1/getLora")
     fun getLoras() : Call<LoraModelResponse>
 
     @Headers(
         "Content-Length: 1000",
-        "Host: 7860",
+        "Host: $host",
         "Connection: keep-alive",
         "Content-Type: application/json"
     )
@@ -125,7 +137,8 @@ data class ArgsData(
 )
 
 object ServiceBuilder{
-    private val txt2imgUrl = "192.168.4.4/sdapi/v1/txt2img"
+    private val txt2imgUrl = "https://192.168.4.4:7860"
+//    private val txt2imgUrl = "https://2939086s6o.yicp.fun:443"
     private val postApi = "sdapi/v1/txt2img"
     private val client = OkHttpClient.Builder()
         .connectTimeout(100, TimeUnit.SECONDS)
@@ -133,10 +146,12 @@ object ServiceBuilder{
         .readTimeout(100, TimeUnit.SECONDS)
         .writeTimeout(100, TimeUnit.SECONDS)
         .connectionPool(ConnectionPool(10, 100, TimeUnit.SECONDS))
+        .retryOnConnectionFailure(true)
+//        .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.4.4:7860")
+        .baseUrl(txt2imgUrl)
         .addConverterFactory((GsonConverterFactory.create()))
         .client(client)
         .build()
@@ -145,6 +160,57 @@ object ServiceBuilder{
         return retrofit.create((service))
     }
 }
+
+//fun getUnsafeOkHttpClient(): OkHttpClient? {
+//    return try {
+//        // Create a trust manager that does not validate certificate chains
+//        val trustAllCerts: Array<TrustManager> = arrayOf<TrustManager>(object : X509TrustManager {
+//            @Throws(CertificateException::class)
+//            override fun checkClientTrusted(
+//                chain: Array<X509Certificate?>?,
+//                authType: String?
+//            ) {
+//            }
+//
+//            @Throws(CertificateException::class)
+//            override fun checkServerTrusted(
+//                chain: Array<X509Certificate?>?,
+//                authType: String?
+//            ) {
+//            }
+//
+//            override fun getAcceptedIssuers(): Array<X509Certificate> {
+//                val inStream: InputStream = FileInputStream("fileName-of-cert")
+//                val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
+//                val cert = cf.generateCertificate(inStream) as X509Certificate
+//                inStream.close()
+//                var res = Array(1){cert}
+//                return res
+//            }
+//
+//
+//            val acceptedIssuers: Array<X509Certificate?>?
+//                get() = arrayOfNulls(0)
+//        })
+//
+//        // Install the all-trusting trust manager
+//        val sslContext: SSLContext = SSLContext.getInstance("TLS")
+//        sslContext.init(
+//            null, trustAllCerts,
+//            SecureRandom()
+//        )
+//        // Create an ssl socket factory with our all-trusting manager
+//        val sslSocketFactory: javax.net.ssl.SSLSocketFactory? = sslContext
+//            .getSocketFactory()
+//        var okHttpClient = OkHttpClient()
+//        okHttpClient = okHttpClient.newBuilder()
+//            .sslSocketFactory(sslSocketFactory)
+//            .hostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER).build()
+//        okHttpClient
+//    } catch (e: Exception) {
+//        throw RuntimeException(e)
+//    }
+//}
 
 data class ResponseModel(
     val message: String
